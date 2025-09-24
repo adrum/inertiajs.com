@@ -249,6 +249,58 @@ export default function () {
         `}
       />
       <P>Instead of passing a single prop as a string, you may also pass an array of props to <Code>reloadOnly</Code> or <Code>reloadExcept</Code>.</P>
+      <H3>Testing Deferred Props</H3>
+      <P>
+        You may use the <Code>loadDeferredProps</Code> method to test how your application responds to{' '}
+        <A href="/deferred-props">deferred props</A>. This method performs a follow-up request to load the deferred
+        properties and allows you to make assertions against the response.
+      </P>
+      <CodeBlock
+        language="php"
+        children={dedent`
+          $response->assertInertia(fn (Assert $page) => $page
+              ->has('users')
+              ->has('roles')
+              ->missing('permissions') // Deferred prop not in initial response
+              ->loadDeferredProps(fn (Assert $reload) => $reload
+                  ->has('permissions')
+                  ->where('permissions.0.name', 'edit users')
+              )
+          );
+        `}
+      />
+      <P>
+        You may also load specific deferred prop groups by passing the group name as the first argument to the{' '}
+        <Code>loadDeferredProps</Code> method.
+      </P>
+      <CodeBlock
+        language="php"
+        children={dedent`
+          $response->assertInertia(fn (Assert $page) => $page
+              ->has('users')
+              ->missing('teams')
+              ->missing('projects')
+              ->loadDeferredProps('attributes', fn (Assert $reload) => $reload
+                  ->has('teams', 5)
+                  ->has('projects')
+                  ->missing('permissions') // Different group
+              )
+          );
+        `}
+      />
+      <P>Instead of passing a single group as a string, you may also pass an array of groups to <Code>loadDeferredProps</Code>.</P>
+      <CodeBlock
+        language="php"
+        children={dedent`
+          $response->assertInertia(fn (Assert $page) => $page
+              ->loadDeferredProps(['default', 'attributes'], fn (Assert $reload) => $reload
+                  ->has('permissions')
+                  ->has('teams')
+                  ->has('projects')
+              )
+          );
+        `}
+      />
     </>
   )
 }
