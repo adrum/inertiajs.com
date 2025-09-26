@@ -1,4 +1,4 @@
-import { A, Code, CodeBlock, H1, H2, Li, Notice, Ol, P, Strong } from '@/Components'
+import { A, Code, CodeBlock, H1, H2, H3, Li, Notice, Ol, P, Strong } from '@/Components'
 import dedent from 'dedent-js'
 
 export const meta = {
@@ -6,9 +6,12 @@ export const meta = {
   links: [
     { url: '#html-responses', name: 'HTML responses' },
     { url: '#inertia-responses', name: 'Inertia responses' },
+    { url: '#request-headers', name: 'Request headers' },
+    { url: '#response-headers', name: 'Response headers' },
     { url: '#the-page-object', name: 'The page object' },
     { url: '#asset-versioning', name: 'Asset versioning' },
     { url: '#partial-reloads', name: 'Partial reloads' },
+    { url: '#http-status-codes', name: 'HTTP status codes' },
   ],
 }
 
@@ -130,11 +133,80 @@ export default function () {
             }
           `}
       />
+      <H2>Request headers</H2>
+      <P>
+        The following headers are automatically sent by Inertia when making requests. You don't need to set these
+        manually, they're handled by the Inertia client-side adapter.
+      </P>
+      <Ol>
+        <Li>
+          <Strong>X-Inertia:</Strong> Set to <Code>true</Code> to indicate this is an Inertia request.
+        </Li>
+        <Li>
+          <Strong>X-Requested-With:</Strong> Set to <Code>XMLHttpRequest</Code> on all Inertia requests.
+        </Li>
+        <Li>
+          <Strong>Accept:</Strong> Set to <Code>text/html, application/xhtml+xml</Code> to indicate acceptable response
+          types.
+        </Li>
+        <Li>
+          <Strong>X-Inertia-Version:</Strong> The current asset version to check for asset mismatches.
+        </Li>
+        <Li>
+          <Strong>Purpose:</Strong> Set to <Code>prefetch</Code> when making <A href="/prefetching">prefetch</A>{' '}
+          requests.
+        </Li>
+        <Li>
+          <Strong>X-Inertia-Partial-Component:</Strong> The component name for{' '}
+          <A href="/partial-reloads">partial reloads</A>.
+        </Li>
+        <Li>
+          <Strong>X-Inertia-Partial-Data:</Strong> Comma-separated list of props to include in partial reloads.
+        </Li>
+        <Li>
+          <Strong>X-Inertia-Partial-Except:</Strong> Comma-separated list of props to exclude from partial reloads.
+        </Li>
+        <Li>
+          <Strong>X-Inertia-Reset:</Strong> Comma-separated list of props to reset on navigation.
+        </Li>
+        <Li>
+          <Strong>Cache-Control:</Strong> Set to <Code>no-cache</Code> for reload requests to prevent serving stale
+          content.
+        </Li>
+        <Li>
+          <Strong>X-Inertia-Error-Bag:</Strong> Specifies which error bag to use for{' '}
+          <A href="/validation">validation errors</A>.
+        </Li>
+        <Li>
+          <Strong>X-Inertia-Infinite-Scroll-Merge-Intent:</Strong> Indicates whether the requested data should be
+          appended or prepended when using <A href="/infinite-scroll">infinite scroll</A>.
+        </Li>
+      </Ol>
+      <H2>Response headers</H2>
+      <P>
+        The following headers should be sent by your server-side adapter in Inertia responses. If you're using an
+        official server-side adapter, these are handled automatically.
+      </P>
+      <Ol>
+        <Li>
+          <Strong>X-Inertia:</Strong> Set to <Code>true</Code> to confirm this is an Inertia response.
+        </Li>
+        <Li>
+          <Strong>X-Inertia-Location:</Strong> Used for external redirects when a <Code>409 Conflict</Code> response is
+          returned due to asset version mismatches.
+        </Li>
+        <Li>
+          <Strong>Vary:</Strong> Set to <Code>X-Inertia</Code> to help browsers correctly differentiate between HTML and
+          JSON responses. This header must be included on both HTML and JSON responses to prevent browsers from showing
+          JSON content instead of rendered HTML or triggering Inertia error handling for normal page visits. Some
+          browsers require this header on all responses, including redirects that lead to Inertia endpoints.
+        </Li>
+      </Ol>
       <H2>The page object</H2>
       <P>
         Inertia shares data between the server and client via a page object. This object includes the necessary
         information required to render the page component, update the browser's history state, and track the site's
-        asset version. The page object includes the following four properties:
+        asset version. The page object can include the following properties:
       </P>
       <Ol>
         <Li>
@@ -155,11 +227,148 @@ export default function () {
         <Li>
           <Strong>clearHistory:</Strong> Whether or not to clear any encrypted history state.
         </Li>
+        <Li>
+          <Strong>mergeProps:</Strong> Array of prop keys that should be merged (appended) during navigation. See the{' '}
+          <A href="/merging-props">merging props</A> documentation for details.
+        </Li>
+        <Li>
+          <Strong>prependProps:</Strong> Array of prop keys that should be prepended during navigation.
+        </Li>
+        <Li>
+          <Strong>deepMergeProps:</Strong> Array of prop keys that should be deep merged during navigation.
+        </Li>
+        <Li>
+          <Strong>matchPropsOn:</Strong> Array of prop keys to use for matching when merging props.
+        </Li>
+        <Li>
+          <Strong>scrollProps:</Strong> Configuration for infinite scroll prop merging behavior.
+        </Li>
+        <Li>
+          <Strong>deferredProps:</Strong> Configuration for client-side lazy loading of props. See the{' '}
+          <A href="/deferred-props">deferred props</A> documentation for details.
+        </Li>
       </Ol>
       <P>
         On standard full page visits, the page object is JSON encoded into the <Code>data-page</Code> attribute in the
         root <Code>{'<div>'}</Code>. On Inertia visits, the page object is returned as the JSON payload.
       </P>
+      <H3>Basic page object</H3>
+      <P>A minimal page object contains the core properties.</P>
+      <CodeBlock
+        className="p-6 leading-normal"
+        language="json"
+        children={dedent`
+            {
+              "component": "User/Edit",
+              "props": {
+                "user": {
+                  "name": "Jonathan"
+                }
+              },
+              "url": "/user/123",
+              "version": "6b16b94d7c51cbe5b1fa42aac98241d5",
+              "clearHistory": false,
+              "encryptHistory": false
+            }
+          `}
+      />
+      <H3>Page object with deferred props</H3>
+      <P>
+        When using deferred props, the page object includes a <Code>deferredProps</Code> configuration. Note that
+        deferred props are not included in the initial props since they are loaded in a subsequent request.
+      </P>
+      <CodeBlock
+        className="p-6 leading-normal"
+        language="json"
+        children={dedent`
+            {
+              "component": "Posts/Index",
+              "props": {
+                "user": {
+                  "name": "Jonathan"
+                }
+              },
+              "url": "/posts",
+              "version": "6b16b94d7c51cbe5b1fa42aac98241d5",
+              "clearHistory": false,
+              "encryptHistory": false,
+              "deferredProps": {
+                "default": ["comments", "analytics"],
+                "sidebar": ["relatedPosts"]
+              }
+            }
+          `}
+      />
+      <H3>Page object with merge props</H3>
+      <P>When using merge props, additional configuration is included.</P>
+      <CodeBlock
+        className="p-6 leading-normal"
+        language="json"
+        children={dedent`
+            {
+              "component": "Feed/Index",
+              "props": {
+                "user": {
+                  "name": "Jonathan"
+                },
+                "posts": [
+                  {"id": 1, "title": "First Post"}
+                ],
+                "notifications": [
+                  {"id": 2, "message": "New comment"}
+                ],
+                "conversations": {
+                  "data": [
+                    {"id": 1, "title": "Support Chat", "participants": ["John", "Jane"]}
+                  ]
+                }
+              },
+              "url": "/feed",
+              "version": "6b16b94d7c51cbe5b1fa42aac98241d5",
+              "clearHistory": false,
+              "encryptHistory": false,
+              "mergeProps": ["posts"],
+              "prependProps": ["notifications"],
+              "deepMergeProps": ["conversations"],
+              "matchPropsOn": ["posts.id", "notifications.id", "conversations.data.id"]
+            }
+          `}
+      />
+      <H3>Page object with scroll props</H3>
+      <P>
+        When using <A href="/infinite-scroll">infinite scroll</A>, the page object includes a <Code>scrollProps</Code>{' '}
+        configuration.
+      </P>
+      <CodeBlock
+        className="p-6 leading-normal"
+        language="json"
+        children={dedent`
+            {
+              "component": "Posts/Index",
+              "props": {
+                "posts": {
+                  "data": [
+                    {"id": 1, "title": "First Post"},
+                    {"id": 2, "title": "Second Post"}
+                  ]
+                }
+              },
+              "url": "/posts?page=1",
+              "version": "6b16b94d7c51cbe5b1fa42aac98241d5",
+              "clearHistory": false,
+              "encryptHistory": false,
+              "mergeProps": ["posts.data"],
+              "scrollProps": {
+                "posts": {
+                  "pageName": "page",
+                  "previousPage": null,
+                  "nextPage": 2,
+                  "currentPage": 1
+                }
+              }
+            }
+          `}
+      />
       <H2>Asset versioning</H2>
       <P>
         One common challenge with single-page apps is refreshing site assets when they've been changed. Inertia makes
@@ -224,7 +433,8 @@ export default function () {
       <P>
         When making Inertia requests, the partial reload option allows you to request a subset of the props (data) from
         the server on subsequent visits to the <em>same</em> page component. This can be a helpful performance
-        optimization if it's acceptable that some page data becomes stale.
+        optimization if it's acceptable that some page data becomes stale. See the{' '}
+        <A href="/partial-reloads">partial reloads</A> documentation for details.
       </P>
       <P>
         When a partial reload request is made, Inertia includes two additional headers with the request:{' '}
@@ -287,6 +497,28 @@ export default function () {
             }
           `}
       />
+      <H2>HTTP status codes</H2>
+      <P>Inertia uses specific HTTP status codes to handle different scenarios.</P>
+      <Ol>
+        <Li>
+          <Strong>200 OK:</Strong> Standard successful response for both HTML and Inertia JSON responses.
+        </Li>
+        <Li>
+          <Strong>302 Found:</Strong> Standard redirect response. Inertia's server-side adapters automatically convert
+          this to <Code>303 See Other</Code> when returned after <Code>PUT</Code>, <Code>PATCH</Code>, or{' '}
+          <Code>DELETE</Code> requests.
+        </Li>
+        <Li>
+          <Strong>303 See Other:</Strong> Used for redirects after non-GET requests. This status code tells the browser
+          to make a <Code>GET</Code> request to the redirect URL, preventing duplicate form submissions that could occur
+          if the browser repeated the original request method.
+        </Li>
+        <Li>
+          <Strong>409 Conflict:</Strong> Returned when there's an asset version mismatch or for external redirects. For
+          asset mismatches, this prompts a full page reload. For external redirects, the response includes an{' '}
+          <Code>X-Inertia-Location</Code> header and triggers a <Code>window.location</Code> redirect client-side.
+        </Li>
+      </Ol>
     </>
   )
 }
