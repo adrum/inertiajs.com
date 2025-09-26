@@ -5,8 +5,9 @@ export const meta = {
   title: 'Merging props',
   links: [
     { url: '#top', name: 'Introduction' },
-    { url: '#server-side', name: 'Server side' },
-    { url: '#client-side', name: 'Client side' },
+    { url: '#merge-methods', name: 'Merge methods' },
+    { url: '#matching-items', name: 'Matching items' },
+    { url: '#deep-merge', name: 'Deep merge' },
     { url: '#client-side-visits', name: 'Client side visits' },
     { url: '#combining-with-deferred-props', name: 'Deferred props' },
     { url: '#resetting-props', name: 'Resetting props' },
@@ -18,89 +19,134 @@ export default function () {
     <>
       <H1>Merging props</H1>
       <P>
-        By default, Inertia overwrites props with the same name when reloading a page. However, there are instances,
-        such as pagination or infinite scrolling, where that is not the desired behavior. In these cases, you can merge
-        props instead of overwriting them.
-      </P>
-      <H2>Server side</H2>
-      <P>
-        To specify that a prop should be merged, you can use the <Code>Inertia::merge()</Code> or{' '}
-        <Code>Inertia::deepMerge()</Code> methods on the prop value.
+        Inertia overwrites props with the same name when reloading a page. However, you may need to merge new data with
+        existing data instead. For example, when implementing a "load more" button for paginated results.
       </P>
       <P>
-        Use <Code>merge</Code> when merging simple arrays, and <Code>deepMerge</Code> when working with nested objects
-        that contain arrays or complex structures, such as pagination objects.
+        Prop merging only works during <A href="/partial-reloads">partial reloads</A>. Full page visits will always
+        replace props entirely, even if you've marked them for merging.
       </P>
-
-      <TabbedCode
-        examples={[
-          {
-            name: 'Shallow Merge',
-            language: 'php',
-            code: dedent`
-            Route::get('/items', function () {
-                // Static array of tags
-                $allTags = [
-                    'Laravel', 'React', 'Vue', 'Tailwind', 'Inertia',
-                    'PHP', 'JavaScript', 'TypeScript', 'Docker', 'Vite',
-                ];
-
-                // Get chunk of tags by page
-                $page = request()->input('page', 1);
-                $perPage = 5;
-                $offset = ($page - 1) * $perPage;
-                $tags = array_slice($allTags, $offset, $perPage);
-
-                return Inertia::render('Tags/Index', [
-                    'tags' => Inertia::merge($tags),
-                ]);
-            });
-            `,
-          },
-          {
-            name: 'Deep Merge',
-            language: 'php',
-            code: dedent`
-            Route::get('/users', function () {
-                $page = request()->input('page', 1);
-                $perPage = request()->input('per_page', 10);
-
-                return Inertia::render('Users/Index', [
-                    'results' => Inertia::deepMerge(User::paginate($perPage, page: $page)),
-                ]);
-            });
-            `,
-          },
-        ]}
-      />
-
+      <H2>Merge methods</H2>
       <P>
-        During the merging process, if the value is an array, the incoming items will be <em>appended</em> to the
-        existing array, not merged by index. However, you may chain the <Code>matchOn</Code> method to determine how
-        existing items should be matched and updated.
+        To merge a prop instead of overwriting it, you may use the <Code>Inertia::merge()</Code> method when returning
+        your response.
       </P>
       <CodeBlock
         language="php"
         children={dedent`
-          Inertia::render('Users/Index', [
-              'users' => Inertia::deepMerge($users)->matchOn('data.id'),
+          Route::get('/items', function () {
+              // Static array of tags...
+              $allTags = [
+                  'Laravel', 'React', 'Vue', 'Tailwind', 'Inertia',
+                  'PHP', 'JavaScript', 'TypeScript', 'Docker', 'Vite',
+              ];
+
+              // Get chunk of tags by page...
+              $page = request()->input('page', 1);
+              $perPage = 5;
+              $offset = ($page - 1) * $perPage;
+              $tags = array_slice($allTags, $offset, $perPage);
+
+              return Inertia::render('Tags/Index', [
+                  'tags' => Inertia::merge($tags),
+              ]);
+          });
+        `}
+      />
+      <P>
+        The <Code>Inertia::merge()</Code> method will append new items to existing arrays at the root level. You may
+        change this behavior to prepend items instead.
+      </P>
+      <CodeBlock
+        language="php"
+        children={dedent`
+          // Append at root level (default)...
+          Inertia::merge($items);
+
+          // Prepend at root level...
+          Inertia::merge($items)->prepend();
+        `}
+      />
+      <P>
+        For more precise control, you can target specific nested properties for merging while replacing the rest of the
+        object.
+      </P>
+      <CodeBlock
+        language="php"
+        children={dedent`
+          // Only append to the 'data' array, replace everything else...
+          Inertia::merge(User::paginate())->append('data');
+
+          // Prepend to the 'messages' array...
+          Inertia::merge($chatData)->prepend('messages');
+        `}
+      />
+      <P>You can combine multiple operations and target several properties at once.</P>
+      <CodeBlock
+        language="php"
+        children={dedent`
+          Inertia::merge($forumData)
+              ->append('posts')
+              ->prepend('announcements');
+
+          // Target multiple properties...
+          Inertia::merge($dashboardData)->append(['notifications', 'activities']);
+        `}
+      />
+      <P>
+        On the client side, Inertia handles all the merging automatically according to your server-side configuration.
+      </P>
+      <H2>Matching items</H2>
+      <P>
+        When merging arrays, you may use the <Code>matchOn</Code> parameter to match existing items by a specific field
+        and update them instead of appending new ones.
+      </P>
+      <CodeBlock
+        language="php"
+        children={dedent`
+          // Match posts by ID, update existing ones...
+          Inertia::merge($postData)->append('data', matchOn: 'id');
+
+          // Multiple properties with different match fields...
+          Inertia::merge($complexData)->append([
+              'users.data' => 'id',
+              'messages' => 'uuid',
           ]);
         `}
       />
       <P>
-        In this example, Inertia will iterate over the <Code>users.data</Code> array and attempt to match each item by
+        In the first example, Inertia will iterate over the <Code>data</Code> array and attempt to match each item by
         its <Code>id</Code> field. If a match is found, the existing item will be replaced. If no match is found, the
         new item will be appended.
       </P>
-      <Notice>
-        You may also pass an array of keys to <Code>matchOn</Code> to specify multiple keys for matching.
-      </Notice>
-      <H2>Client side</H2>
+      <H2>Deep merge</H2>
       <P>
-        On the client side, Inertia detects that this prop should be merged. If the prop returns an array, it will
-        append the response to the current prop value. If it's an object, it will merge the response with the current
-        prop value. If you have opted to <Code>deepMerge</Code>, Inertia ensures a deep merge of the entire structure.
+        Instead of specifying which nested paths should be merged, you may use <Code>Inertia::deepMerge()</Code>
+        to ensure a deep merge of the entire structure.
       </P>
+      <CodeBlock
+        language="php"
+        children={dedent`
+          Route::get('/chat', function () {
+              $chatData = [
+                  'messages' => [
+                      ['id' => 4, 'text' => 'Hello there!', 'user' => 'Alice'],
+                      ['id' => 5, 'text' => 'How are you?', 'user' => 'Bob'],
+                  ],
+                  'online' => 12,
+              ];
+
+              return Inertia::render('Chat', [
+                  'chat' => Inertia::deepMerge($chatData)->matchOn('messages.id'),
+              ]);
+          });
+        `}
+      />
+      <Notice>
+        <Code>Inertia::deepMerge()</Code> was introduced before <Code>Inertia::merge()</Code> had support for prepending
+        and targeting nested paths. In most cases, <Code>Inertia::merge()</Code> with its append and prepend methods
+        should be sufficient.
+      </Notice>
       <H2 id="client-side-visits">Client side visits</H2>
       <P>
         You can also merge props directly on the client side without making a server request using{' '}
