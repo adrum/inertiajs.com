@@ -20,7 +20,8 @@ export default function () {
       <H1>Merging props</H1>
       <P>
         Inertia overwrites props with the same name when reloading a page. However, you may need to merge new data with
-        existing data instead. For example, when implementing a "load more" button for paginated results.
+        existing data instead. For example, when implementing a "load more" button for paginated results. The{' '}
+        <A href="/infinite-scroll">Infinite scroll</A> component uses prop merging under the hood.
       </P>
       <P>
         Prop merging only works during <A href="/partial-reloads">partial reloads</A>. Full page visits will always

@@ -179,7 +179,7 @@ export default function () {
         </Li>
         <Li>
           <Strong>X-Inertia-Infinite-Scroll-Merge-Intent:</Strong> Indicates whether the requested data should be
-          appended or prepended when using <A href="/infinite-scroll">infinite scroll</A>.
+          appended or prepended when using <A href="/infinite-scroll">Infinite scroll</A>.
         </Li>
       </Ol>
       <H2>Response headers</H2>
@@ -336,7 +336,7 @@ export default function () {
       />
       <H3>Page object with scroll props</H3>
       <P>
-        When using <A href="/infinite-scroll">infinite scroll</A>, the page object includes a <Code>scrollProps</Code>{' '}
+        When using <A href="/infinite-scroll">Infinite scroll</A>, the page object includes a <Code>scrollProps</Code>{' '}
         configuration.
       </P>
       <CodeBlock

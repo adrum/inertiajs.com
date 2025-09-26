@@ -345,7 +345,8 @@ export default function () {
       </P>
       <P>
         This is useful when you want to load data every time the element becomes visible, such as when the element is at
-        the end of an infinite scroll list and you want to load more data.
+        the end of an infinite scroll list and you want to load more data. Alternatively, you can use the{' '}
+        <A href="/infinite-scroll">Infinite scroll</A> component which handles this use case for you.
       </P>
       <P>
         Note that if the data loading request is already in flight, the component will wait until it is finished to
