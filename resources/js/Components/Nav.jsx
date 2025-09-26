@@ -175,6 +175,11 @@ const Nav = ({ className }) => {
           </Link>
         </li>
         <li className="md:pr-3">
+          <Link href="/infinite-scroll" className={linkClass('/infinite-scroll')}>
+            Infinite scroll
+          </Link>
+        </li>
+        <li className="md:pr-3">
           <Link href="/remembering-state" className={linkClass('/remembering-state')}>
             Remembering state
           </Link>
