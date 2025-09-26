@@ -1,4 +1,4 @@
-import { A, Code, H1, H2, MinimumVersion, Notice, P, TabbedCode } from '@/Components'
+import { A, Code, H1, H2, H3, MinimumVersion, Notice, P, TabbedCode } from '@/Components'
 import dedent from 'dedent-js'
 
 export const meta = {
@@ -288,8 +288,8 @@ export default function () {
         ]}
       />
       <P>
-        If you provide both a Wayfinder object and specify the <Code>method</Code> option, the{' '}
-        <Code>method</Code> option will take precedence.
+        If you provide both a Wayfinder object and specify the <Code>method</Code> option, the <Code>method</Code>{' '}
+        option will take precedence.
       </P>
       <TabbedCode
         examples={[
@@ -633,17 +633,17 @@ export default function () {
         ]}
       />
       <P>
-        All of the parameters are optional. By default, all passed paramaters (except <Code>errorBag</Code>){' '}
-        will be merged with the current page. This means you are responsible for overriding the current page's
-        URL, component, and props.
+        All of the parameters are optional. By default, all passed paramaters (except <Code>errorBag</Code>) will be
+        merged with the current page. This means you are responsible for overriding the current page's URL, component,
+        and props.
       </P>
       <P>
         If you need access to the current page's props, you can pass a function to the props option. This function will
         receive the current page's props as an argument and should return the new props.
       </P>
       <P>
-        The <Code>errorBag</Code> option allows you to specify which error bag to use when handling validation errors
-        in the <Code>onError</Code> callback.
+        The <Code>errorBag</Code> option allows you to specify which error bag to use when handling validation errors in
+        the <Code>onError</Code> callback.
       </P>
       <TabbedCode
         examples={[
@@ -692,6 +692,117 @@ export default function () {
         Make sure that any route you push on the client side is also defined on the server side. If the user refreshes
         the page, the server will need to know how to render the page.
       </Notice>
+      <H3 id="prop-helpers">Prop helpers</H3>
+      <P>
+        Inertia provides three helper methods for updating page props without making server requests. These
+        methods are shortcuts to <Code>router.replace()</Code> and automatically set <Code>preserveScroll</Code> and{' '}
+        <Code>preserveState</Code> to <Code>true</Code>.
+      </P>
+      <TabbedCode
+        examples={[
+          {
+            name: 'Vue',
+            language: 'js',
+            code: dedent`
+              import { router } from '@inertiajs/vue3'
+
+              // Replace a prop value...
+              router.replaceProp('user.name', 'Jane Smith')
+
+              // Append to an array prop...
+              router.appendToProp('messages', { id: 4, text: 'New message' })
+
+              // Prepend to an array prop...
+              router.prependToProp('tags', 'urgent')
+            `,
+          },
+          {
+            name: 'React',
+            language: 'js',
+            code: dedent`
+              import { router } from '@inertiajs/react'
+
+              // Replace a prop value...
+              router.replaceProp('user.name', 'Jane Smith')
+
+              // Append to an array prop...
+              router.appendToProp('messages', { id: 4, text: 'New message' })
+
+              // Prepend to an array prop...
+              router.prependToProp('tags', 'urgent')
+            `,
+          },
+          {
+            name: 'Svelte',
+            language: 'js',
+            code: dedent`
+              import { router } from '@inertiajs/svelte'
+
+              // Replace a prop value...
+              router.replaceProp('user.name', 'Jane Smith')
+
+              // Append to an array prop...
+              router.appendToProp('messages', { id: 4, text: 'New message' })
+
+              // Prepend to an array prop...
+              router.prependToProp('tags', 'urgent')
+            `,
+          },
+        ]}
+      />
+      <P>
+        All three methods support dot notation for nested props and can accept a callback function that receives the
+        current value as the first argument and the current page props as the second argument.
+      </P>
+      <TabbedCode
+        examples={[
+          {
+            name: 'Vue',
+            language: 'js',
+            code: dedent`
+              import { router } from '@inertiajs/vue3'
+
+              router.prependToProp('notifications', (current, props) => {
+                return {
+                  id: Date.now(),
+                  message: \`Hello \${props.user.name}\`,
+                  timestamp: new Date()
+                }
+              })
+            `,
+          },
+          {
+            name: 'React',
+            language: 'js',
+            code: dedent`
+              import { router } from '@inertiajs/react'
+
+              router.prependToProp('notifications', (current, props) => {
+                return {
+                  id: Date.now(),
+                  message: \`Hello \${props.user.name}\`,
+                  timestamp: new Date()
+                }
+              })
+            `,
+          },
+          {
+            name: 'Svelte',
+            language: 'js',
+            code: dedent`
+              import { router } from '@inertiajs/svelte'
+
+              router.prependToProp('notifications', (current, props) => {
+                return {
+                  id: Date.now(),
+                  message: \`Hello \${props.user.name}\`,
+                  timestamp: new Date()
+                }
+              })
+            `,
+          },
+        ]}
+      />
       <H2>State preservation</H2>
       <P>
         By default, page visits to the same page create a fresh page component instance. This causes any local state,

@@ -7,6 +7,7 @@ export const meta = {
     { url: '#top', name: 'Introduction' },
     { url: '#server-side', name: 'Server side' },
     { url: '#client-side', name: 'Client side' },
+    { url: '#client-side-visits', name: 'Client side visits' },
     { url: '#combining-with-deferred-props', name: 'Deferred props' },
     { url: '#resetting-props', name: 'Resetting props' },
   ],
@@ -23,8 +24,8 @@ export default function () {
       </P>
       <H2>Server side</H2>
       <P>
-        To specify that a prop should be merged, you can use the <Code>Inertia::merge()</Code> or <Code>Inertia::deepMerge()</Code> methods on
-        the prop value.
+        To specify that a prop should be merged, you can use the <Code>Inertia::merge()</Code> or{' '}
+        <Code>Inertia::deepMerge()</Code> methods on the prop value.
       </P>
       <P>
         Use <Code>merge</Code> when merging simple arrays, and <Code>deepMerge</Code> when working with nested objects
@@ -74,9 +75,9 @@ export default function () {
       />
 
       <P>
-        During the merging process, if the value is an array, the incoming items will be{' '}
-        <em>appended</em> to the existing array, not merged by index. However, you may chain the{' '}
-        <Code>matchOn</Code> method to determine how existing items should be matched and updated.
+        During the merging process, if the value is an array, the incoming items will be <em>appended</em> to the
+        existing array, not merged by index. However, you may chain the <Code>matchOn</Code> method to determine how
+        existing items should be matched and updated.
       </P>
       <CodeBlock
         language="php"
@@ -87,9 +88,9 @@ export default function () {
         `}
       />
       <P>
-        In this example, Inertia will iterate over the <Code>users.data</Code> array and attempt to{' '}
-        match each item by its <Code>id</Code> field. If a match is found, the existing item will be replaced.
-        If no match is found, the new item will be appended.
+        In this example, Inertia will iterate over the <Code>users.data</Code> array and attempt to match each item by
+        its <Code>id</Code> field. If a match is found, the existing item will be replaced. If no match is found, the
+        new item will be appended.
       </P>
       <Notice>
         You may also pass an array of keys to <Code>matchOn</Code> to specify multiple keys for matching.
@@ -99,6 +100,13 @@ export default function () {
         On the client side, Inertia detects that this prop should be merged. If the prop returns an array, it will
         append the response to the current prop value. If it's an object, it will merge the response with the current
         prop value. If you have opted to <Code>deepMerge</Code>, Inertia ensures a deep merge of the entire structure.
+      </P>
+      <H2 id="client-side-visits">Client side visits</H2>
+      <P>
+        You can also merge props directly on the client side without making a server request using{' '}
+        <A href="/manual-visits#client-side-visits">client side visits</A>. Inertia provides{' '}
+        <A href="/manual-visits#prop-helpers">prop helper methods</A> that allow you to append, prepend, or replace prop
+        values.
       </P>
       <H2>Combining with deferred props</H2>
       <P>
