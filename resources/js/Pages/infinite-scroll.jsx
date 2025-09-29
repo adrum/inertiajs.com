@@ -1001,6 +1001,37 @@ export default function () {
           },
         ]}
       />
+      <H3>Multiple scroll containers</H3>
+      <P>
+        Sometimes you may need to render multiple infinite scroll components on a single page. However, if both
+        components use the default <Code>page</Code> query parameter for{' '}
+        <A href="#url-synchronization">URL synchronization</A>, they will conflict with each other. To resolve this,
+        instruct each paginator to use a custom <Code>pageName</Code>.
+      </P>
+      <CodeBlock
+        language="php"
+        children={dedent`
+          Route::get('/dashboard', function () {
+              return Inertia::render('Dashboard', [
+                  'users' => Inertia::scroll(
+                      fn () => User::paginate(pageName: 'users')
+                  ),
+                  'orders' => Inertia::scroll(
+                      fn () => Order::paginate(pageName: 'orders')
+                  ),
+              ]);
+          });
+        `}
+      />
+      <P>
+        The <Code>Inertia::scroll()</Code> method automatically detects the <Code>pageName</Code> from each paginator,
+        allowing both scroll containers to maintain independent pagination state. This results in URLs like{' '}
+        <Code>?users=2&orders=3</Code> instead of conflicting <Code>?page=</Code> parameters.
+      </P>
+      <P>
+        For more information about pagination page names, see{' '}
+        <A href="https://laravel.com/docs/pagination#multiple-paginator-instances-per-page">Laravel's documentation</A>.
+      </P>
       <H2>Programmatic access</H2>
       <P>When you need to trigger loading actions programmatically, you may use a template ref.</P>
       <TabbedCode
@@ -1082,20 +1113,20 @@ export default function () {
         ]}
       />
       <P>The component exposes the following methods:</P>
-      <ul className="ml-4 space-y-2 text-gray-700 list-disc list-inside">
-        <li>
+      <Ul>
+        <Li>
           <Code>fetchNext()</Code> - Manually fetch the next page
-        </li>
-        <li>
+        </Li>
+        <Li>
           <Code>fetchPrevious()</Code> - Manually fetch the previous page
-        </li>
-        <li>
+        </Li>
+        <Li>
           <Code>hasNext()</Code> - Whether there is a next page
-        </li>
-        <li>
+        </Li>
+        <Li>
           <Code>hasPrevious()</Code> - Whether there is a previous page
-        </li>
-      </ul>
+        </Li>
+      </Ul>
 
       <H2>Inertia::scroll() method</H2>
       <P>
