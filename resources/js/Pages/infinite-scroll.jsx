@@ -9,6 +9,7 @@ export const meta = {
     { url: '#client-side', name: 'Client-side' },
     { url: '#loading-buffer', name: 'Loading buffer' },
     { url: '#url-synchronization', name: 'URL synchronization' },
+    { url: '#resetting', name: 'Resetting' },
     { url: '#loading-direction', name: 'Loading direction' },
     { url: '#reverse-mode', name: 'Reverse mode' },
     { url: '#manual-mode', name: 'Manual mode' },
@@ -200,6 +201,109 @@ export default function () {
       <P>
         This is useful when infinite scroll is used for secondary content that shouldn't affect the main page URL, such
         as comments on a blog post or related products on a product page.
+      </P>
+      <H2>Resetting</H2>
+      <P>
+        When filters or other parameters change, you may need to reset the infinite scroll data to start from the
+        beginning. Without resetting, new results will merge with existing content instead of replacing it.
+      </P>
+      <P>
+        You can reset data using the <Code>reset</Code> visit option.
+      </P>
+      <TabbedCode
+        examples={[
+          {
+            name: 'Vue',
+            language: 'markup',
+            code: dedent`
+              <script setup>
+              import { router } from '@inertiajs/vue3'
+
+              const show = (role) => {
+                router.visit(route('users'), {
+                  data: { filter: { role } },
+                  only: ['users'],
+                  reset: ['users'],
+                })
+              }
+              </script>
+
+              <template>
+                <button @click="show('admin')">Show admins</button>
+                <button @click="show('customer')">Show customers</button>
+
+                <InfiniteScroll data="users">
+                  <div v-for="user in users.data" :key="user.id">
+                    {{ user.name }}
+                  </div>
+                </InfiniteScroll>
+              </template>
+            `,
+          },
+          {
+            name: 'React',
+            language: 'jsx',
+            code: dedent`
+              import { InfiniteScroll, router } from '@inertiajs/react'
+
+              export default function Users({ users }) {
+                const show = (role) => {
+                  router.visit(route('users'), {
+                    data: { filter: { role } },
+                    only: ['users'],
+                    reset: ['users'],
+                  })
+                }
+
+                return (
+                  <>
+                    <button onClick={() => show('admin')}>Show admins</button>
+                    <button onClick={() => show('customer')}>Show customers</button>
+
+                    <InfiniteScroll data="users">
+                      {users.data.map(user => (
+                        <div key={user.id}>
+                          {user.name}
+                        </div>
+                      ))}
+                    </InfiniteScroll>
+                  </>
+                )
+              }
+            `,
+          },
+          {
+            name: 'Svelte',
+            language: 'jsx',
+            code: dedent`
+              <script>
+                import { InfiniteScroll, router } from '@inertiajs/svelte'
+                export let users
+
+                const show = (role) => {
+                  router.visit(route('users'), {
+                    data: { filter: { role } },
+                    only: ['users'],
+                    reset: ['users'],
+                  })
+                }
+              </script>
+
+              <button on:click={() => show('admin')}>Show admins</button>
+              <button on:click={() => show('customer')}>Show customers</button>
+
+              <InfiniteScroll data="users">
+                {#each users.data as user (user.id)}
+                  <div>{user.name}</div>
+                {/each}
+              </InfiniteScroll>
+            `,
+          },
+        ]}
+      />
+      <P>
+        For more information about the reset option, see the{' '}
+        <A href="/merging-props#resetting-props">Resetting props</A> documentation.
       </P>
       <H2>Loading direction</H2>
       <P>
