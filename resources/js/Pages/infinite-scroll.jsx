@@ -525,10 +525,10 @@ export default function () {
               </script>
 
               <InfiniteScroll data="users" manual>
-                <div slot="previous" let:exposedPrevious>
-                  {#if exposedPrevious.hasMore}
-                    <button on:click={exposedPrevious.fetch} disabled={exposedPrevious.loading}>
-                      {exposedPrevious.loading ? 'Loading...' : 'Load previous'}
+                <div slot="previous" let:hasMore let:fetch let:loading>
+                  {#if hasMore}
+                    <button on:click={fetch} disabled={loading}>
+                      {loading ? 'Loading...' : 'Load previous'}
                     </button>
                   {/if}
                 </div>
@@ -537,10 +537,10 @@ export default function () {
                   <div>{user.name}</div>
                 {/each}
 
-                <div slot="next" let:exposedNext>
-                  {#if exposedNext.hasMore}
-                    <button on:click={exposedNext.fetch} disabled={exposedNext.loading}>
-                      {exposedNext.loading ? 'Loading...' : 'Load more'}
+                <div slot="next" let:hasMore let:fetch let:loading>
+                  {#if hasMore}
+                    <button on:click={fetch} disabled={loading}>
+                      {loading ? 'Loading...' : 'Load more'}
                     </button>
                   {/if}
                 </div>
